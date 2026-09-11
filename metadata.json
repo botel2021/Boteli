@@ -1,0 +1,6 @@
+{
+  "name": "恩典之光基督教会",
+  "description": "基督教会官方主页，展示主日崇拜日程、讲道影音、团契事工、每日经文与访客指南",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
