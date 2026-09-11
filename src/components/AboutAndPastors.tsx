@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Church, BookCheck, Shield, Heart, Award, Quote } from 'lucide-react';
-import { PASTORS_DATA, CHURCH_INFO } from '../data/churchData';
+import { PASTORS_DATA } from '../data/churchData';
+import { useChurch } from '../context/ChurchContext';
+import exteriorImg from '../assets/images/church_exterior_warm_1789118281568.jpg';
 
 export const AboutAndPastors: React.FC = () => {
+  const { churchInfo } = useChurch();
   const [showCreed, setShowCreed] = useState(false);
 
   return (
@@ -15,11 +18,11 @@ export const AboutAndPastors: React.FC = () => {
             About Our Church & Pastors
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif-sc font-bold text-stone-900">
-            关于恩典之光基督教会
+            关于{churchInfo.name}
           </h2>
           <p className="mt-4 text-stone-600 text-sm sm:text-base leading-relaxed">
             我们是一间立足圣经真理、持守普世大公教会正统信仰的基督教会。
-            自{CHURCH_INFO.foundedYear}创立以来，竭力传扬纯正福音，见证基督博爱，致力于服侍城市与关怀邻舍。
+            自{churchInfo.foundedYear}创立以来，竭力传扬纯正福音，见证基督博爱，致力于服侍城市与关怀邻舍。
           </p>
         </div>
 
@@ -28,7 +31,7 @@ export const AboutAndPastors: React.FC = () => {
           {/* Left: Exterior Photo */}
           <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-xl border border-stone-200 group">
             <img
-              src="/src/assets/images/church_exterior_warm_1789118281568.jpg"
+              src={exteriorImg}
               alt="恩典之光基督教会园区外景"
               referrerPolicy="no-referrer"
               className="w-full h-[360px] sm:h-[420px] object-cover group-hover:scale-105 transition-transform duration-700"

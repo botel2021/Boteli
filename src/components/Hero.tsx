@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, Heart, ArrowRight, ShieldCheck, Sparkles, Volume2 } from 'lucide-react';
 import { useChurch } from '../context/ChurchContext';
+import sanctuaryImg from '../assets/images/church_hero_sanctuary_1789118267362.jpg';
 
 interface HeroProps {
   onNavigate: (sectionId: string) => void;
@@ -58,7 +59,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       {/* Background Image Container */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/church_hero_sanctuary_1789118267362.jpg"
+          src={sanctuaryImg}
           alt="恩典之光基督教会大礼堂"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center scale-105 transform duration-1000"
