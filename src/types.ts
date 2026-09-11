@@ -127,3 +127,18 @@ export interface CountdownConfig {
   subtitle: string; // 崇拜堂次与地点说明
   inProgressText: string; // 崇拜进行中提示文案
 }
+
+export interface ModuleVisibilityConfig {
+  hero: boolean;             // 顶部宏伟欢迎横幅
+  countdown: boolean;        // 聚会/特会倒计时横幅
+  dailyVerse: boolean;       // 每日经文金句与灵修默想
+  worshipSchedule: boolean;  // 崇拜聚会时间表
+  sermons: boolean;          // 主日讲道与影音专区
+  ministries: boolean;       // 团契与分龄事工
+  visitorGuide: boolean;     // 新朋友指南与到访预约
+  prayerWall: boolean;       // 同心代祷墙与祷告信项
+  events: boolean;           // 教会特别活动与日程
+  aboutUs: boolean;          // 关于教会与教牧团队
+  contact: boolean;          // 聚会地点交通与联络
+}
+

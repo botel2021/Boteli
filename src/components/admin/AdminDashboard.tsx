@@ -23,11 +23,13 @@ import {
   RotateCcw,
   Download,
   X,
-  Sparkles
+  Sparkles,
+  SlidersHorizontal
 } from 'lucide-react';
 import { useChurch } from '../../context/ChurchContext';
 import { ServiceSchedule, Sermon, BibleVerse, ChurchEvent } from '../../types';
 import { CountdownConfigPanel } from './CountdownConfigPanel';
+import { ModuleVisibilityPanel } from './ModuleVisibilityPanel';
 
 interface AdminDashboardProps {
   onBackToSite: () => void;
@@ -39,6 +41,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
     updateChurchInfo,
     countdownConfig,
     updateCountdownConfig,
+    moduleVisibility,
+    toggleModuleVisibility,
+    updateModuleVisibility,
     services,
     addService,
     updateService,
@@ -67,7 +72,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   } = useChurch();
 
   const [activeTab, setActiveTab] = useState<
-    'info' | 'countdown' | 'services' | 'sermons' | 'verses' | 'events' | 'rsvps' | 'prayers' | 'security'
+    'info' | 'countdown' | 'modules' | 'services' | 'sermons' | 'verses' | 'events' | 'rsvps' | 'prayers' | 'security'
   >('info');
 
   const [saveToast, setSaveToast] = useState(false);
@@ -272,6 +277,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const tabs = [
     { id: 'info', label: '基本资料', icon: Church, count: undefined },
     { id: 'countdown', label: '倒计时设置', icon: Timer, count: undefined },
+    { id: 'modules', label: '模块显隐控制', icon: SlidersHorizontal, count: undefined },
     { id: 'services', label: '崇拜日程', icon: Clock, count: services.length },
     { id: 'sermons', label: '主日讲道', icon: Headphones, count: sermons.length },
     { id: 'verses', label: '每日金句', icon: BookOpen, count: verses.length },
@@ -516,6 +522,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               countdownForm={countdownForm}
               setCountdownForm={setCountdownForm}
               onSave={handleSaveCountdown}
+              churchName={churchInfo.name}
+            />
+          )}
+
+          {/* TAB: Module Visibility Config */}
+          {activeTab === 'modules' && (
+            <ModuleVisibilityPanel
+              visibility={moduleVisibility}
+              onToggle={toggleModuleVisibility}
+              onUpdateAll={updateModuleVisibility}
+              onShowSavedToast={showSavedNotification}
               churchName={churchInfo.name}
             />
           )}

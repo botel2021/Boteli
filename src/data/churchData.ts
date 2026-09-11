@@ -7,7 +7,8 @@ import {
   PrayerRequest,
   Pastor,
   FAQItem,
-  CountdownConfig
+  CountdownConfig,
+  ModuleVisibilityConfig
 } from '../types';
 
 export const CHURCH_INFO = {
@@ -37,6 +38,20 @@ export const DEFAULT_COUNTDOWN_CONFIG: CountdownConfig = {
   title: '距离本周主日崇拜还有',
   subtitle: '早堂 10:00 · 午堂 14:30 · 普拉托伯特利主堂',
   inProgressText: '今日主日崇拜现正进行中 · 欢迎入堂或在线同步参与'
+};
+
+export const DEFAULT_MODULE_VISIBILITY: ModuleVisibilityConfig = {
+  hero: true,
+  countdown: true,
+  dailyVerse: true,
+  worshipSchedule: true,
+  sermons: true,
+  ministries: true,
+  visitorGuide: true,
+  prayerWall: true,
+  events: true,
+  aboutUs: true,
+  contact: true
 };
 
 export const SERVICES_SCHEDULE: ServiceSchedule[] = [

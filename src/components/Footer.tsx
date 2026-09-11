@@ -8,7 +8,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenAdmin }) => {
-  const { churchInfo } = useChurch();
+  const { churchInfo, moduleVisibility } = useChurch();
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

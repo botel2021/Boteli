@@ -8,11 +8,13 @@ import {
   ChurchEvent,
   PrayerRequest,
   VisitorRSVP,
-  CountdownConfig
+  CountdownConfig,
+  ModuleVisibilityConfig
 } from '../types';
 import {
   CHURCH_INFO,
   DEFAULT_COUNTDOWN_CONFIG,
+  DEFAULT_MODULE_VISIBILITY,
   SERVICES_SCHEDULE,
   SERMONS_DATA,
   DAILY_VERSES,
@@ -24,6 +26,7 @@ import {
 interface ChurchContextType {
   churchInfo: ChurchInfo;
   countdownConfig: CountdownConfig;
+  moduleVisibility: ModuleVisibilityConfig;
   services: ServiceSchedule[];
   sermons: Sermon[];
   verses: BibleVerse[];
@@ -43,6 +46,10 @@ interface ChurchContextType {
 
   // Countdown config
   updateCountdownConfig: (config: CountdownConfig) => void;
+
+  // Module visibility
+  updateModuleVisibility: (config: ModuleVisibilityConfig) => void;
+  toggleModuleVisibility: (moduleKey: keyof ModuleVisibilityConfig) => void;
 
   // Services
   addService: (service: Omit<ServiceSchedule, 'id'>) => void;
@@ -84,6 +91,7 @@ const ChurchContext = createContext<ChurchContextType | undefined>(undefined);
 const STORAGE_KEYS = {
   INFO: 'church_info_v2',
   COUNTDOWN: 'church_countdown_v2',
+  MODULES: 'church_modules_visibility_v1',
   SERVICES: 'church_services_v1',
   SERMONS: 'church_sermons_v1',
   VERSES: 'church_verses_v1',
@@ -120,6 +128,19 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return saved ? JSON.parse(saved) : DEFAULT_COUNTDOWN_CONFIG;
     } catch {
       return DEFAULT_COUNTDOWN_CONFIG;
+    }
+  });
+
+  // 1.2 Module Visibility Config
+  const [moduleVisibility, setModuleVisibility] = useState<ModuleVisibilityConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.MODULES);
+      if (saved) {
+        return { ...DEFAULT_MODULE_VISIBILITY, ...JSON.parse(saved) };
+      }
+      return DEFAULT_MODULE_VISIBILITY;
+    } catch {
+      return DEFAULT_MODULE_VISIBILITY;
     }
   });
 
@@ -234,6 +255,14 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     try {
+      localStorage.setItem(STORAGE_KEYS.MODULES, JSON.stringify(moduleVisibility));
+    } catch (e) {
+      console.warn('Storage write error', e);
+    }
+  }, [moduleVisibility]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(services));
     } catch (e) {
       console.warn('Storage write error', e);
@@ -307,6 +336,27 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateCountdownConfig = (newConfig: CountdownConfig) => {
     setCountdownConfig(newConfig);
+  };
+
+  const updateModuleVisibility = (newConfig: ModuleVisibilityConfig) => {
+    setModuleVisibility(newConfig);
+    // Keep countdownConfig.enabled in sync if countdown visibility was adjusted
+    if (newConfig.countdown !== countdownConfig.enabled) {
+      setCountdownConfig((prev) => ({ ...prev, enabled: newConfig.countdown }));
+    }
+  };
+
+  const toggleModuleVisibility = (moduleKey: keyof ModuleVisibilityConfig) => {
+    setModuleVisibility((prev) => {
+      const nextState = {
+        ...prev,
+        [moduleKey]: !prev[moduleKey]
+      };
+      if (moduleKey === 'countdown') {
+        setCountdownConfig((c) => ({ ...c, enabled: nextState.countdown }));
+      }
+      return nextState;
+    });
   };
 
   const addService = (serviceData: Omit<ServiceSchedule, 'id'>) => {
@@ -431,6 +481,7 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const resetToDefaults = () => {
     setChurchInfo(CHURCH_INFO);
     setCountdownConfig(DEFAULT_COUNTDOWN_CONFIG);
+    setModuleVisibility(DEFAULT_MODULE_VISIBILITY);
     setServices(SERVICES_SCHEDULE);
     setSermons(SERMONS_DATA);
     setVerses(DAILY_VERSES);
@@ -445,6 +496,7 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value={{
         churchInfo,
         countdownConfig,
+        moduleVisibility,
         services,
         sermons,
         verses,
@@ -458,6 +510,8 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         changeAdminPassword,
         updateChurchInfo,
         updateCountdownConfig,
+        updateModuleVisibility,
+        toggleModuleVisibility,
         addService,
         updateService,
         deleteService,

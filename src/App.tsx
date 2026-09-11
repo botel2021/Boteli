@@ -25,32 +25,33 @@ function ChurchAppContent() {
   const [activeSection, setActiveSection] = useState('hero');
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { isAdminLoggedIn } = useChurch();
+  const { isAdminLoggedIn, moduleVisibility } = useChurch();
 
   // Track active section on scroll
   useEffect(() => {
     if (showAdminDashboard) return;
 
     const handleScroll = () => {
-      const sectionIds = [
-        'hero',
-        'daily-verse',
-        'worship-schedule',
-        'sermons',
-        'ministries',
-        'visitor-guide',
-        'prayer-wall',
-        'events',
-        'about-us',
-        'contact'
+      const sectionCandidates = [
+        { id: 'hero', enabled: moduleVisibility.hero },
+        { id: 'daily-verse', enabled: moduleVisibility.dailyVerse },
+        { id: 'worship-schedule', enabled: moduleVisibility.worshipSchedule },
+        { id: 'sermons', enabled: moduleVisibility.sermons },
+        { id: 'ministries', enabled: moduleVisibility.ministries },
+        { id: 'visitor-guide', enabled: moduleVisibility.visitorGuide },
+        { id: 'prayer-wall', enabled: moduleVisibility.prayerWall },
+        { id: 'events', enabled: moduleVisibility.events },
+        { id: 'about-us', enabled: moduleVisibility.aboutUs },
+        { id: 'contact', enabled: moduleVisibility.contact }
       ];
 
+      const activeIds = sectionCandidates.filter((s) => s.enabled).map((s) => s.id);
       const scrollPosition = window.scrollY + 200;
 
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
+      for (let i = activeIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(activeIds[i]);
         if (el && el.offsetTop <= scrollPosition) {
-          setActiveSection(sectionIds[i]);
+          setActiveSection(activeIds[i]);
           break;
         }
       }
@@ -58,7 +59,7 @@ function ChurchAppContent() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [showAdminDashboard]);
+  }, [showAdminDashboard, moduleVisibility]);
 
   const handleNavigate = (sectionId: string) => {
     if (showAdminDashboard) {
@@ -139,34 +140,34 @@ function ChurchAppContent() {
       {/* Main Sections */}
       <main className="flex-grow">
         {/* 1. Hero banner with sanctuary imagery & service countdown */}
-        <Hero onNavigate={handleNavigate} />
+        {moduleVisibility.hero && <Hero onNavigate={handleNavigate} />}
 
         {/* 2. Verse of the Day & Devotional reflection widget */}
-        <DailyVerseWidget />
+        {moduleVisibility.dailyVerse && <DailyVerseWidget />}
 
         {/* 3. Worship Service Schedules (Sunday & Weekday) */}
-        <WorshipScheduleSection onNavigate={handleNavigate} />
+        {moduleVisibility.worshipSchedule && <WorshipScheduleSection onNavigate={handleNavigate} />}
 
         {/* 4. Sermons Media Library with playable audio & outline drawer */}
-        <SermonPlayer />
+        {moduleVisibility.sermons && <SermonPlayer />}
 
         {/* 5. Ministries & Fellowships for all life stages */}
-        <MinistriesSection />
+        {moduleVisibility.ministries && <MinistriesSection />}
 
         {/* 6. Visitor Guide & Newcomer FAQs */}
-        <VisitorGuideSection />
+        {moduleVisibility.visitorGuide && <VisitorGuideSection />}
 
         {/* 7. Intercessory Prayer Wall & Online Prayer Requests */}
-        <PrayerWallSection />
+        {moduleVisibility.prayerWall && <PrayerWallSection />}
 
         {/* 8. Church Events Calendar & Retreats */}
-        <EventsSection />
+        {moduleVisibility.events && <EventsSection />}
 
         {/* 9. About Church, Statement of Faith (Apostles' Creed) & Pastoral Team */}
-        <AboutAndPastors />
+        {moduleVisibility.aboutUs && <AboutAndPastors />}
 
         {/* 10. Campus Location, Transportation & Pastoral Contact */}
-        <ContactAndLocation />
+        {moduleVisibility.contact && <ContactAndLocation />}
       </main>
 
       {/* Footer */}

@@ -25,7 +25,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection, onOpenAdmin }) => {
-  const { churchInfo, isAdminLoggedIn } = useChurch();
+  const { churchInfo, isAdminLoggedIn, moduleVisibility } = useChurch();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -41,17 +41,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection, onOpe
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { id: 'worship-schedule', label: '崇拜时间', icon: Clock },
-    { id: 'daily-verse', label: '每日经文', icon: BookOpen },
-    { id: 'sermons', label: '主日讲道', icon: Headphones },
-    { id: 'ministries', label: '团契事工', icon: Users },
-    { id: 'visitor-guide', label: '新朋友指南', icon: Compass },
-    { id: 'prayer-wall', label: '同心代祷', icon: Heart },
-    { id: 'events', label: '教会活动', icon: Calendar },
-    { id: 'about-us', label: '关于教会', icon: Church },
-    { id: 'contact', label: '来访交通', icon: MapPin },
+  const allNavItems = [
+    { id: 'worship-schedule', label: '崇拜时间', icon: Clock, enabled: moduleVisibility?.worshipSchedule !== false },
+    { id: 'daily-verse', label: '每日经文', icon: BookOpen, enabled: moduleVisibility?.dailyVerse !== false },
+    { id: 'sermons', label: '主日讲道', icon: Headphones, enabled: moduleVisibility?.sermons !== false },
+    { id: 'ministries', label: '团契事工', icon: Users, enabled: moduleVisibility?.ministries !== false },
+    { id: 'visitor-guide', label: '新朋友指南', icon: Compass, enabled: moduleVisibility?.visitorGuide !== false },
+    { id: 'prayer-wall', label: '同心代祷', icon: Heart, enabled: moduleVisibility?.prayerWall !== false },
+    { id: 'events', label: '教会活动', icon: Calendar, enabled: moduleVisibility?.events !== false },
+    { id: 'about-us', label: '关于教会', icon: Church, enabled: moduleVisibility?.aboutUs !== false },
+    { id: 'contact', label: '来访交通', icon: MapPin, enabled: moduleVisibility?.contact !== false },
   ];
+
+  const navItems = allNavItems.filter((item) => item.enabled);
 
   const handleNavClick = (id: string) => {
     onNavigate(id);
@@ -66,11 +68,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection, onOpe
           <div className="flex items-center space-x-6">
             <span className="flex items-center gap-1.5 text-stone-300">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
-              主日崇拜：每周日 09:00 / 11:00
+              主日崇拜：{churchInfo.sundayMainServiceTime || '每周日 09:30 / 11:15'}
             </span>
             <span className="flex items-center gap-1.5 text-stone-300">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
-              成都市高新区天府大道中段128号
+              {churchInfo.address}
             </span>
             <span className="flex items-center gap-1.5 text-stone-300">
               <Phone className="w-3.5 h-3.5 text-amber-400" />

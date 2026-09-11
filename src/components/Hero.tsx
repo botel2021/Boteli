@@ -8,12 +8,18 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
-  const { churchInfo, countdownConfig } = useChurch();
+  const { churchInfo, countdownConfig, moduleVisibility } = useChurch();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isInProgress, setIsInProgress] = useState(false);
 
+  const isCountdownVisible = Boolean(
+    countdownConfig &&
+    countdownConfig.enabled &&
+    moduleVisibility?.countdown !== false
+  );
+
   useEffect(() => {
-    if (!countdownConfig || !countdownConfig.enabled) return;
+    if (!isCountdownVisible) return;
 
     const calculateCountdown = () => {
       const now = new Date();
@@ -146,38 +152,44 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 mb-10">
-            <button
-              onClick={() => onNavigate('worship-schedule')}
-              id="hero-btn-services"
-              className="px-6 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm sm:text-base shadow-lg shadow-amber-900/30 transition-all flex items-center gap-2 group"
-            >
-              <Clock className="w-4 h-4 text-amber-100" />
-              <span>主日崇拜日程</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            {moduleVisibility?.worshipSchedule !== false && (
+              <button
+                onClick={() => onNavigate('worship-schedule')}
+                id="hero-btn-services"
+                className="px-6 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm sm:text-base shadow-lg shadow-amber-900/30 transition-all flex items-center gap-2 group"
+              >
+                <Clock className="w-4 h-4 text-amber-100" />
+                <span>主日崇拜日程</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            )}
 
-            <button
-              onClick={() => onNavigate('visitor-guide')}
-              id="hero-btn-visitor"
-              className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm sm:text-base backdrop-blur-md border border-white/20 transition-all flex items-center gap-2"
-            >
-              <Heart className="w-4 h-4 text-rose-300" />
-              <span>新朋友初访指南</span>
-            </button>
+            {moduleVisibility?.visitorGuide !== false && (
+              <button
+                onClick={() => onNavigate('visitor-guide')}
+                id="hero-btn-visitor"
+                className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm sm:text-base backdrop-blur-md border border-white/20 transition-all flex items-center gap-2"
+              >
+                <Heart className="w-4 h-4 text-rose-300" />
+                <span>新朋友初访指南</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => onNavigate('sermons')}
-              id="hero-btn-sermons"
-              className="px-5 py-3.5 rounded-xl bg-stone-900/60 hover:bg-stone-800/80 text-stone-300 hover:text-white font-medium text-sm sm:text-base border border-stone-700/50 transition-all flex items-center gap-2"
-            >
-              <Volume2 className="w-4 h-4 text-amber-400" />
-              <span>讲道影音</span>
-            </button>
+            {moduleVisibility?.sermons !== false && (
+              <button
+                onClick={() => onNavigate('sermons')}
+                id="hero-btn-sermons"
+                className="px-5 py-3.5 rounded-xl bg-stone-900/60 hover:bg-stone-800/80 text-stone-300 hover:text-white font-medium text-sm sm:text-base border border-stone-700/50 transition-all flex items-center gap-2"
+              >
+                <Volume2 className="w-4 h-4 text-amber-400" />
+                <span>讲道影音</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Next Service Countdown / Live Indicator Banner */}
-        {countdownConfig && countdownConfig.enabled && (
+        {isCountdownVisible && (
           <div className="max-w-4xl bg-stone-900/90 backdrop-blur-md rounded-2xl border border-stone-700/60 p-5 sm:p-6 text-white shadow-2xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3">
