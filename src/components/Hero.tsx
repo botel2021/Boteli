@@ -8,51 +8,97 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
-  const { churchInfo } = useChurch();
-  // Countdown to next Sunday 09:00 service
+  const { churchInfo, countdownConfig } = useChurch();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [isSundayMorning, setIsSundayMorning] = useState(false);
+  const [isInProgress, setIsInProgress] = useState(false);
 
   useEffect(() => {
+    if (!countdownConfig || !countdownConfig.enabled) return;
+
     const calculateCountdown = () => {
       const now = new Date();
-      const currentDay = now.getDay(); // 0 is Sunday, 1 is Monday ... 6 is Saturday
-      const currentHour = now.getHours();
 
-      // Check if it's currently Sunday morning during service (09:00 - 12:30)
-      if (currentDay === 0 && currentHour >= 9 && currentHour < 13) {
-        setIsSundayMorning(true);
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
+      if (countdownConfig.mode === 'custom') {
+        // Custom target date mode
+        const target = new Date(countdownConfig.customTargetDate);
+        const diff = target.getTime() - now.getTime();
 
-      setIsSundayMorning(false);
+        if (isNaN(diff)) {
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+          setIsInProgress(false);
+          return;
+        }
 
-      // Target: Next Sunday at 09:00:00
-      let daysUntilSunday = (7 - currentDay) % 7;
-      if (daysUntilSunday === 0 && currentHour >= 9) {
-        // Today is Sunday but past 9am, next Sunday is in 7 days
-        daysUntilSunday = 7;
-      }
+        // If within 3 hours past start time, consider it in progress
+        if (diff <= 0 && diff > -3 * 3600 * 1000) {
+          setIsInProgress(true);
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+          return;
+        }
 
-      const nextSunday = new Date(now);
-      nextSunday.setDate(now.getDate() + daysUntilSunday);
-      nextSunday.setHours(9, 0, 0, 0);
+        setIsInProgress(false);
+        if (diff > 0) {
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          setTimeLeft({ days, hours, minutes, seconds });
+        } else {
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        }
+      } else {
+        // Weekly mode
+        const targetDay = countdownConfig.weeklyDay ?? 0;
+        const [targetHourStr, targetMinStr] = (countdownConfig.weeklyTime || '10:00').split(':');
+        const targetHour = parseInt(targetHourStr, 10) || 10;
+        const targetMinute = parseInt(targetMinStr, 10) || 0;
+        const durationHours = countdownConfig.weeklyDurationHours || 3;
 
-      const diff = nextSunday.getTime() - now.getTime();
-      if (diff > 0) {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft({ days, hours, minutes, seconds });
+        const currentDay = now.getDay();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeMinutes = currentHour * 60 + currentMinute;
+        const targetStartTimeMinutes = targetHour * 60 + targetMinute;
+        const targetEndTimeMinutes = targetStartTimeMinutes + durationHours * 60;
+
+        // Check if currently during service window
+        if (
+          currentDay === targetDay &&
+          currentTimeMinutes >= targetStartTimeMinutes &&
+          currentTimeMinutes < targetEndTimeMinutes
+        ) {
+          setIsInProgress(true);
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+          return;
+        }
+
+        setIsInProgress(false);
+
+        // Calculate days until next occurrence
+        let daysUntil = (targetDay - currentDay + 7) % 7;
+        if (daysUntil === 0 && currentTimeMinutes >= targetStartTimeMinutes) {
+          daysUntil = 7;
+        }
+
+        const nextTarget = new Date(now);
+        nextTarget.setDate(now.getDate() + daysUntil);
+        nextTarget.setHours(targetHour, targetMinute, 0, 0);
+
+        const diff = nextTarget.getTime() - now.getTime();
+        if (diff > 0) {
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          setTimeLeft({ days, hours, minutes, seconds });
+        }
       }
     };
 
     calculateCountdown();
     const interval = setInterval(calculateCountdown, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [countdownConfig]);
 
   return (
     <div id="hero" className="relative pt-24 md:pt-28 pb-16 lg:pb-24 overflow-hidden">
@@ -60,7 +106,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       <div className="absolute inset-0 z-0">
         <img
           src={sanctuaryImg}
-          alt="恩典之光基督教会大礼堂"
+          alt={`${churchInfo.name}大礼堂`}
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center scale-105 transform duration-1000"
         />
@@ -131,62 +177,70 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         </div>
 
         {/* Next Service Countdown / Live Indicator Banner */}
-        <div className="max-w-4xl bg-stone-900/90 backdrop-blur-md rounded-2xl border border-stone-700/60 p-5 sm:p-6 text-white shadow-2xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-3">
-              <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl shrink-0">
-                <Calendar className="w-6 h-6" />
+        {countdownConfig && countdownConfig.enabled && (
+          <div className="max-w-4xl bg-stone-900/90 backdrop-blur-md rounded-2xl border border-stone-700/60 p-5 sm:p-6 text-white shadow-2xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl shrink-0">
+                  <Calendar className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wider text-amber-400 font-semibold font-cinzel">
+                    {countdownConfig.badgeText || (countdownConfig.mode === 'custom' ? 'Special Church Event' : 'Upcoming Sunday Worship')}
+                  </div>
+                  <div className="text-base sm:text-lg font-serif-sc font-semibold text-stone-100">
+                    {isInProgress
+                      ? (countdownConfig.inProgressText || '今日主日崇拜现正进行中')
+                      : countdownConfig.mode === 'custom'
+                      ? countdownConfig.customTitle
+                      : `${countdownConfig.title || '距离本周主日崇拜还有'}（${countdownConfig.weeklyTime || '10:00'}）`}
+                  </div>
+                  <div className="text-xs text-stone-400 mt-0.5">
+                    {countdownConfig.mode === 'custom'
+                      ? countdownConfig.customSubtitle
+                      : (countdownConfig.subtitle || `${churchInfo.sundayMainServiceTime} · ${churchInfo.address}`)}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-xs uppercase tracking-wider text-amber-400 font-semibold font-cinzel">
-                  Upcoming Sunday Worship
-                </div>
-                <div className="text-base sm:text-lg font-serif-sc font-semibold text-stone-100">
-                  {isSundayMorning ? '今日主日崇拜现正进行中' : '距离本周主日崇拜（早堂 09:00）还有'}
-                </div>
-                <div className="text-xs text-stone-400 mt-0.5">
-                  早堂 09:00 · 午堂 11:00 · 成都市高新区天府大道中段128号主堂
-                </div>
-              </div>
-            </div>
 
-            {/* Timer boxes */}
-            {isSundayMorning ? (
-              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span>崇拜正在进行 · 欢迎亲临或线上参与</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 sm:gap-3 text-center self-start md:self-auto">
-                <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-amber-300">{timeLeft.days}</div>
-                  <div className="text-[10px] text-stone-400 uppercase">天</div>
+              {/* Timer boxes */}
+              {isInProgress ? (
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm font-medium">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span>{countdownConfig.inProgressText || '崇拜正在进行 · 欢迎亲临或线上参与'}</span>
                 </div>
-                <span className="text-stone-600 font-bold">:</span>
-                <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-stone-100">
-                    {String(timeLeft.hours).padStart(2, '0')}
+              ) : (
+                <div className="flex items-center gap-2 sm:gap-3 text-center self-start md:self-auto">
+                  <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
+                    <div className="text-lg sm:text-xl font-bold font-mono text-amber-300">{timeLeft.days}</div>
+                    <div className="text-[10px] text-stone-400 uppercase">天</div>
                   </div>
-                  <div className="text-[10px] text-stone-400 uppercase">时</div>
-                </div>
-                <span className="text-stone-600 font-bold">:</span>
-                <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-stone-100">
-                    {String(timeLeft.minutes).padStart(2, '0')}
+                  <span className="text-stone-600 font-bold">:</span>
+                  <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
+                    <div className="text-lg sm:text-xl font-bold font-mono text-stone-100">
+                      {String(timeLeft.hours).padStart(2, '0')}
+                    </div>
+                    <div className="text-[10px] text-stone-400 uppercase">时</div>
                   </div>
-                  <div className="text-[10px] text-stone-400 uppercase">分</div>
-                </div>
-                <span className="text-stone-600 font-bold">:</span>
-                <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-amber-400">
-                    {String(timeLeft.seconds).padStart(2, '0')}
+                  <span className="text-stone-600 font-bold">:</span>
+                  <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
+                    <div className="text-lg sm:text-xl font-bold font-mono text-stone-100">
+                      {String(timeLeft.minutes).padStart(2, '0')}
+                    </div>
+                    <div className="text-[10px] text-stone-400 uppercase">分</div>
                   </div>
-                  <div className="text-[10px] text-stone-400 uppercase">秒</div>
+                  <span className="text-stone-600 font-bold">:</span>
+                  <div className="bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-lg min-w-[52px]">
+                    <div className="text-lg sm:text-xl font-bold font-mono text-amber-400">
+                      {String(timeLeft.seconds).padStart(2, '0')}
+                    </div>
+                    <div className="text-[10px] text-stone-400 uppercase">秒</div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Church 4 Pillars Guarantee / Reassurance */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-stone-800/60 text-stone-300">

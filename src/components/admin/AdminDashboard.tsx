@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Church,
   Clock,
+  Timer,
   BookOpen,
   Headphones,
   Calendar,
@@ -21,10 +22,12 @@ import {
   Radio,
   RotateCcw,
   Download,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { useChurch } from '../../context/ChurchContext';
 import { ServiceSchedule, Sermon, BibleVerse, ChurchEvent } from '../../types';
+import { CountdownConfigPanel } from './CountdownConfigPanel';
 
 interface AdminDashboardProps {
   onBackToSite: () => void;
@@ -34,6 +37,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const {
     churchInfo,
     updateChurchInfo,
+    countdownConfig,
+    updateCountdownConfig,
     services,
     addService,
     updateService,
@@ -62,7 +67,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   } = useChurch();
 
   const [activeTab, setActiveTab] = useState<
-    'info' | 'services' | 'sermons' | 'verses' | 'events' | 'rsvps' | 'prayers' | 'security'
+    'info' | 'countdown' | 'services' | 'sermons' | 'verses' | 'events' | 'rsvps' | 'prayers' | 'security'
   >('info');
 
   const [saveToast, setSaveToast] = useState(false);
@@ -77,6 +82,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
   const handleSaveInfo = (e: React.FormEvent) => {
     e.preventDefault();
     updateChurchInfo(infoForm);
+    showSavedNotification();
+  };
+
+  // 1.1 Countdown Form State
+  const [countdownForm, setCountdownForm] = useState(countdownConfig);
+
+  useEffect(() => {
+    setCountdownForm(countdownConfig);
+  }, [countdownConfig]);
+
+  const handleSaveCountdown = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateCountdownConfig(countdownForm);
     showSavedNotification();
   };
 
@@ -253,6 +271,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
 
   const tabs = [
     { id: 'info', label: '基本资料', icon: Church, count: undefined },
+    { id: 'countdown', label: '倒计时设置', icon: Timer, count: undefined },
     { id: 'services', label: '崇拜日程', icon: Clock, count: services.length },
     { id: 'sermons', label: '主日讲道', icon: Headphones, count: sermons.length },
     { id: 'verses', label: '每日金句', icon: BookOpen, count: verses.length },
@@ -313,8 +332,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col md:flex-row gap-8">
         {/* Sidebar Navigation */}
         <aside className="md:w-60 shrink-0">
-          <div className="bg-white rounded-2xl border border-stone-200 p-3 shadow-xs space-y-1 sticky top-24">
-            <div className="px-3 py-2 text-[11px] font-bold text-stone-400 uppercase tracking-wider font-cinzel">
+          <div className="bg-white rounded-2xl border border-stone-300 p-3 shadow-xs space-y-1 sticky top-24">
+            <div className="px-3 py-2 text-[11px] font-bold text-stone-600 uppercase tracking-wider font-cinzel">
               Management Modules
             </div>
             {tabs.map((tab) => {
@@ -324,20 +343,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-amber-700 text-white font-semibold shadow-xs'
-                      : 'text-stone-700 hover:bg-stone-100'
+                      ? 'bg-amber-700 text-white font-bold shadow-xs'
+                      : 'text-stone-900 hover:bg-stone-100 hover:text-stone-950'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <IconComp className={`w-4 h-4 ${isActive ? 'text-amber-200' : 'text-stone-500'}`} />
+                    <IconComp className={`w-4 h-4 ${isActive ? 'text-amber-200' : 'text-stone-700'}`} />
                     <span>{tab.label}</span>
                   </div>
                   {tab.count !== undefined && (
                     <span
-                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
-                        isActive ? 'bg-amber-800 text-amber-100' : 'bg-stone-100 text-stone-600'
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                        isActive ? 'bg-amber-800 text-amber-100' : 'bg-stone-200 text-stone-900'
                       }`}
                     >
                       {tab.count}
@@ -356,10 +375,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     教会基本资料与联络信息
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     修改教会名称、主题经文、地址、电话及主日直播地址
                   </p>
                 </div>
@@ -368,7 +387,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               <form onSubmit={handleSaveInfo} className="space-y-5 max-w-2xl">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       教会中文名称 *
                     </label>
                     <input
@@ -376,104 +395,104 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                       required
                       value={infoForm.name}
                       onChange={(e) => setInfoForm({ ...infoForm, name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       教会英文名称
                     </label>
                     <input
                       type="text"
                       value={infoForm.nameEn}
                       onChange={(e) => setInfoForm({ ...infoForm, nameEn: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     宗旨与座右铭 (Motto)
                   </label>
                   <input
                     type="text"
                     value={infoForm.motto}
                     onChange={(e) => setInfoForm({ ...infoForm, motto: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                    className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     年度/主页金句主题 (Theme Scripture)
                   </label>
                   <textarea
                     rows={2}
                     value={infoForm.bibleTheme}
                     onChange={(e) => setInfoForm({ ...infoForm, bibleTheme: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                    className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       联系电话
                     </label>
                     <input
                       type="text"
                       value={infoForm.phone}
                       onChange={(e) => setInfoForm({ ...infoForm, phone: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       联系邮箱
                     </label>
                     <input
                       type="email"
                       value={infoForm.email}
                       onChange={(e) => setInfoForm({ ...infoForm, email: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     实体园区地址
                   </label>
                   <input
                     type="text"
                     value={infoForm.address}
                     onChange={(e) => setInfoForm({ ...infoForm, address: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                    className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       线上直播房间地址/提示
                     </label>
                     <input
                       type="text"
                       value={infoForm.liveStreamUrl}
                       onChange={(e) => setInfoForm({ ...infoForm, liveStreamUrl: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       教牧值班时间
                     </label>
                     <input
                       type="text"
                       value={infoForm.pastoralHours}
                       onChange={(e) => setInfoForm({ ...infoForm, pastoralHours: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-stone-50"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 shadow-2xs"
                     />
                   </div>
                 </div>
@@ -491,15 +510,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             </div>
           )}
 
+          {/* TAB: Countdown Config */}
+          {activeTab === 'countdown' && (
+            <CountdownConfigPanel
+              countdownForm={countdownForm}
+              setCountdownForm={setCountdownForm}
+              onSave={handleSaveCountdown}
+              churchName={churchInfo.name}
+            />
+          )}
+
           {/* TAB 2: Services Schedule */}
           {activeTab === 'services' && (
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     主日崇拜与聚会日程管理
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     管理早堂、午堂、青年与周间聚会的时间和堂次
                   </p>
                 </div>
@@ -516,26 +545,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 {services.map((service) => (
                   <div
                     key={service.id}
-                    className="p-5 rounded-2xl border border-stone-200 bg-stone-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    className="p-5 rounded-2xl border border-stone-300 bg-stone-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-medium text-xs">
+                        <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-950 font-bold text-xs border border-amber-300">
                           {service.day}
                         </span>
-                        <span className="font-mono text-xs font-bold text-stone-700">
+                        <span className="font-mono text-xs font-bold text-stone-950">
                           {service.time}
                         </span>
                         {service.isOnlineAvailable && (
-                          <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <span className="text-[11px] text-emerald-950 bg-emerald-100 font-bold px-2 py-0.5 rounded border border-emerald-300">
                             直播支持
                           </span>
                         )}
                       </div>
-                      <h4 className="text-base font-serif-sc font-bold text-stone-900">
+                      <h4 className="text-base font-serif-sc font-bold text-stone-950">
                         {service.name}
                       </h4>
-                      <p className="text-xs text-stone-500 mt-1">
+                      <p className="text-xs text-stone-800 font-medium mt-1">
                         {service.location} · {service.language} · {service.targetGroup}
                       </p>
                     </div>
@@ -543,7 +572,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => handleOpenEditService(service)}
-                        className="p-2 text-stone-600 hover:text-amber-800 hover:bg-stone-200/60 rounded-lg transition-colors"
+                        className="p-2 text-stone-700 hover:text-amber-900 hover:bg-stone-200/80 rounded-lg transition-colors"
                         title="编辑"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -555,7 +584,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                             showSavedNotification();
                           }
                         }}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        className="p-2 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
                         title="删除"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -572,10 +601,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     主日讲道与影音发布
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     录入最新讲道主题、经文、讲员及四大提纲
                   </p>
                 </div>
@@ -592,18 +621,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 {sermons.map((sermon) => (
                   <div
                     key={sermon.id}
-                    className="p-5 rounded-2xl border border-stone-200 bg-stone-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    className="p-5 rounded-2xl border border-stone-300 bg-stone-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1 text-xs">
-                        <span className="text-amber-700 font-semibold">{sermon.series}</span>
+                        <span className="text-amber-900 font-bold">{sermon.series}</span>
                         <span className="text-stone-400">·</span>
-                        <span className="text-stone-500">{sermon.date}</span>
+                        <span className="text-stone-800 font-bold">{sermon.date}</span>
                       </div>
-                      <h4 className="text-base font-serif-sc font-bold text-stone-900">
+                      <h4 className="text-base font-serif-sc font-bold text-stone-950">
                         {sermon.title}
                       </h4>
-                      <div className="text-xs text-stone-600 mt-1">
+                      <div className="text-xs text-stone-900 font-medium mt-1">
                         讲员：{sermon.speaker} | 经文：{sermon.scripture} | 时长：{sermon.duration}
                       </div>
                     </div>
@@ -611,7 +640,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => handleOpenEditSermon(sermon)}
-                        className="p-2 text-stone-600 hover:text-amber-800 hover:bg-stone-200/60 rounded-lg"
+                        className="p-2 text-stone-700 hover:text-amber-900 hover:bg-stone-200/80 rounded-lg"
                         title="编辑讲道"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -623,7 +652,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                             showSavedNotification();
                           }
                         }}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                        className="p-2 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
                         title="删除讲道"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -640,10 +669,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     每日金句与灵修管理
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     维护每日轮播展示的圣经经文与教牧灵修笔记
                   </p>
                 </div>
@@ -669,19 +698,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 {verses.map((v) => (
                   <div
                     key={v.id}
-                    className="p-5 rounded-2xl border border-stone-200 bg-stone-50 flex items-start justify-between gap-4"
+                    className="p-5 rounded-2xl border border-stone-300 bg-stone-50 flex items-start justify-between gap-4 shadow-2xs"
                   >
                     <div>
-                      <span className="px-2 py-0.5 bg-amber-100 text-amber-900 text-xs rounded-md font-medium">
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-950 text-xs rounded-md font-bold border border-amber-300">
                         {v.category}
                       </span>
-                      <p className="font-serif-sc text-sm text-stone-800 my-2 italic">
+                      <p className="font-serif-sc text-sm text-stone-950 font-medium my-2 italic">
                         “{v.verse}”
                       </p>
-                      <div className="text-xs text-amber-800 font-bold">
+                      <div className="text-xs text-amber-900 font-bold">
                         —— {v.reference}
                       </div>
-                      <div className="text-xs text-stone-500 mt-1">
+                      <div className="text-xs text-stone-800 font-medium mt-1">
                         灵修：{v.reflection}
                       </div>
                     </div>
@@ -693,7 +722,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                           setEditingVerse(v);
                           setVerseForm({ ...v });
                         }}
-                        className="p-2 text-stone-600 hover:text-amber-800 hover:bg-stone-200/60 rounded-lg"
+                        className="p-2 text-stone-700 hover:text-amber-900 hover:bg-stone-200/80 rounded-lg"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -704,7 +733,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                             showSavedNotification();
                           }
                         }}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                        className="p-2 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -720,10 +749,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     特别聚会与活动日历
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     管理受洗崇拜、培灵特会、长者慰问与青年户外活动
                   </p>
                 </div>
@@ -754,24 +783,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="p-5 rounded-2xl border border-stone-200 bg-stone-50 flex items-start justify-between gap-4"
+                    className="p-5 rounded-2xl border border-stone-300 bg-stone-50 flex items-start justify-between gap-4 shadow-2xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-xs font-semibold">
+                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-950 text-xs font-bold border border-amber-300">
                           {event.category}
                         </span>
-                        <span className="text-xs text-stone-500 font-mono">
+                        <span className="text-xs text-stone-900 font-mono font-bold">
                           {event.date} ({event.dayOfWeek}) · {event.time}
                         </span>
                       </div>
-                      <h4 className="text-base font-serif-sc font-bold text-stone-900">
+                      <h4 className="text-base font-serif-sc font-bold text-stone-950">
                         {event.title}
                       </h4>
-                      <p className="text-xs text-stone-600 mt-1">
+                      <p className="text-xs text-stone-900 font-medium mt-1">
                         {event.description}
                       </p>
-                      <div className="text-xs text-stone-500 mt-2">
+                      <div className="text-xs text-stone-800 font-medium mt-2">
                         地点：{event.location} | 主持：{event.speakerOrHost || '教牧同工'} |{' '}
                         {event.requiresRegistration ? '需报名' : '自由入场'}
                       </div>
@@ -784,7 +813,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                           setEditingEvent(event);
                           setEventForm({ ...event });
                         }}
-                        className="p-2 text-stone-600 hover:text-amber-800 hover:bg-stone-200/60 rounded-lg"
+                        className="p-2 text-stone-700 hover:text-amber-900 hover:bg-stone-200/80 rounded-lg"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -795,7 +824,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                             showSavedNotification();
                           }
                         }}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                        className="p-2 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -811,70 +840,94 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     新朋友到访预约列表
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     查看前台新朋友提交的到访预约，安排同工提前接待
                   </p>
                 </div>
-                <div className="text-xs text-stone-500 font-mono">
+                <div className="text-xs font-bold text-stone-800 font-mono bg-stone-100 px-3 py-1.5 rounded-xl border border-stone-300">
                   共收到 {rsvps.length} 条预约
                 </div>
               </div>
 
               {rsvps.length === 0 ? (
-                <div className="text-center py-12 text-stone-400 text-sm">
+                <div className="text-center py-12 text-stone-600 font-medium text-sm bg-stone-50 rounded-2xl border border-stone-200">
                   暂无新朋友预约记录
                 </div>
               ) : (
-                <div className="divide-y divide-stone-200">
-                  {rsvps.map((rsvp) => (
-                    <div
-                      key={rsvp.id}
-                      className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-stone-900 text-sm">{rsvp.name}</span>
-                          <span className="text-xs text-stone-500">（{rsvp.count}）</span>
-                          <span className="text-xs text-stone-400">· 登记时间：{rsvp.createdAt}</span>
-                        </div>
-                        <div className="text-xs text-stone-600">
-                          预定参加：<strong className="text-amber-800">{rsvp.date}</strong>
-                          {rsvp.phone && ` | 联系电话：${rsvp.phone}`}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={rsvp.status}
-                          onChange={(e) =>
-                            updateRSVPStatus(
-                              rsvp.id,
-                              e.target.value as '待联系' | '已安排接待' | '已到访'
-                            )
-                          }
-                          className="px-2.5 py-1 text-xs rounded-lg border border-stone-300 bg-stone-50 font-medium"
-                        >
-                          <option value="待联系">待联系</option>
-                          <option value="已安排接待">已安排接待</option>
-                          <option value="已到访">已到访</option>
-                        </select>
-                        <button
-                          onClick={() => {
-                            if (confirm('删除该条到访记录？')) {
-                              deleteRSVP(rsvp.id);
-                              showSavedNotification();
-                            }
-                          }}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 rounded"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto rounded-2xl border border-stone-300 shadow-2xs">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-stone-100 border-b border-stone-300 text-stone-950 font-bold text-xs">
+                        <th className="py-3.5 px-4">到访姓名</th>
+                        <th className="py-3.5 px-4">人数</th>
+                        <th className="py-3.5 px-4">预定到访日期</th>
+                        <th className="py-3.5 px-4">联系电话</th>
+                        <th className="py-3.5 px-4">登记时间</th>
+                        <th className="py-3.5 px-4">接待状态</th>
+                        <th className="py-3.5 px-4 text-center">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-200 bg-white">
+                      {rsvps.map((rsvp) => (
+                        <tr key={rsvp.id} className="hover:bg-stone-50/80 transition-colors text-sm">
+                          <td className="py-3.5 px-4 font-bold text-stone-950 whitespace-nowrap">
+                            {rsvp.name}
+                          </td>
+                          <td className="py-3.5 px-4 font-semibold text-stone-900 whitespace-nowrap">
+                            {rsvp.count}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-amber-900 whitespace-nowrap">
+                            {rsvp.date}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-medium text-stone-900 whitespace-nowrap">
+                            {rsvp.phone || '未填写'}
+                          </td>
+                          <td className="py-3.5 px-4 text-xs font-semibold text-stone-700 whitespace-nowrap">
+                            {rsvp.createdAt}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <select
+                              value={rsvp.status}
+                              onChange={(e) =>
+                                updateRSVPStatus(
+                                  rsvp.id,
+                                  e.target.value as '待联系' | '已安排接待' | '已到访'
+                                )
+                              }
+                              className={`px-3 py-1 text-xs rounded-lg border font-bold focus:outline-none focus:ring-2 focus:ring-amber-600 ${
+                                rsvp.status === '已到访'
+                                  ? 'bg-emerald-50 text-emerald-950 border-emerald-400'
+                                  : rsvp.status === '已安排接待'
+                                  ? 'bg-blue-50 text-blue-950 border-blue-400'
+                                  : 'bg-amber-50 text-amber-950 border-amber-400'
+                              }`}
+                            >
+                              <option value="待联系">待联系</option>
+                              <option value="已安排接待">已安排接待</option>
+                              <option value="已到访">已到访</option>
+                            </select>
+                          </td>
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <button
+                              onClick={() => {
+                                if (confirm(`确认删除【${rsvp.name}】的预约记录？`)) {
+                                  deleteRSVP(rsvp.id);
+                                  showSavedNotification();
+                                }
+                              }}
+                              className="p-1.5 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="删除记录"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -885,10 +938,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     同心代祷墙信项审核与管理
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     审核信徒代祷信项、标记蒙应允感恩见证、删除不当内容
                   </p>
                 </div>
@@ -898,27 +951,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                 {prayers.map((prayer) => (
                   <div
                     key={prayer.id}
-                    className="p-5 rounded-2xl border border-stone-200 bg-stone-50 flex items-start justify-between gap-4"
+                    className="p-5 rounded-2xl border border-stone-300 bg-stone-50 flex items-start justify-between gap-4 shadow-2xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1.5 text-xs">
-                        <span className="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-medium">
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-950 rounded font-bold border border-amber-300">
                           {prayer.category}
                         </span>
-                        <span className="font-semibold text-stone-800">
+                        <span className="font-bold text-stone-950">
                           {prayer.isAnonymous ? '匿名肢体' : prayer.author}
                         </span>
-                        <span className="text-stone-400">· {prayer.createdAt}</span>
-                        <span className="text-rose-600 flex items-center gap-1 font-mono">
-                          <Heart className="w-3 h-3 fill-rose-600" />
+                        <span className="text-stone-700 font-medium">· {prayer.createdAt}</span>
+                        <span className="text-rose-700 flex items-center gap-1 font-mono font-bold">
+                          <Heart className="w-3.5 h-3.5 fill-rose-600" />
                           {prayer.amenCount} 人阿们
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-stone-700 leading-relaxed font-serif-sc">
+                      <p className="text-xs sm:text-sm text-stone-950 leading-relaxed font-serif-sc font-medium">
                         {prayer.content}
                       </p>
                       {prayer.isAnswered && (
-                        <div className="mt-2 text-xs text-emerald-700 font-medium">
+                        <div className="mt-2 text-xs text-emerald-900 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 inline-block">
                           ✓ 已标记为：蒙神垂听成就
                         </div>
                       )}
@@ -930,10 +983,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                           togglePrayerAnswered(prayer.id);
                           showSavedNotification();
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
                           prayer.isAnswered
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-stone-200 hover:bg-stone-300 text-stone-700'
+                            ? 'bg-emerald-100 text-emerald-950 border-emerald-300'
+                            : 'bg-stone-200 hover:bg-stone-300 text-stone-900 border-stone-300'
                         }`}
                       >
                         {prayer.isAnswered ? '已蒙应允' : '标记已蒙应允'}
@@ -945,7 +998,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                             showSavedNotification();
                           }
                         }}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                        className="p-2 text-stone-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                        title="删除代祷"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -961,28 +1015,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-stone-200">
                 <div>
-                  <h3 className="text-xl font-serif-sc font-bold text-stone-900">
+                  <h3 className="text-xl font-serif-sc font-bold text-stone-950">
                     教务管理密码与系统设置
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <p className="text-xs text-stone-700 font-medium mt-0.5">
                     修改后台管理密码、导出数据备份或重置演示数据
                   </p>
                 </div>
               </div>
 
               {/* Password Change Form */}
-              <div className="max-w-md bg-stone-50 p-6 rounded-2xl border border-stone-200 mb-8">
-                <h4 className="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">
+              <div className="max-w-md bg-stone-50 p-6 rounded-2xl border border-stone-300 mb-8 shadow-2xs">
+                <h4 className="text-sm font-bold text-stone-950 mb-4 flex items-center gap-2">
                   <KeyRound className="w-4 h-4 text-amber-700" />
                   <span>修改后台管理密码</span>
                 </h4>
 
                 {pwdMsg && (
                   <div
-                    className={`p-3 rounded-xl text-xs mb-4 ${
+                    className={`p-3 rounded-xl text-xs mb-4 font-medium ${
                       pwdMsg.includes('成功')
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        ? 'bg-emerald-50 text-emerald-950 border border-emerald-300'
+                        : 'bg-rose-50 text-rose-950 border border-rose-300'
                     }`}
                   >
                     {pwdMsg}
@@ -991,7 +1045,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
 
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       输入新管理密码
                     </label>
                     <input
@@ -1000,12 +1054,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                       placeholder="不少于4位字符"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-white"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 placeholder:text-stone-500 shadow-2xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-bold text-stone-900 mb-1">
                       确认新密码
                     </label>
                     <input
@@ -1014,13 +1068,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                       placeholder="再次输入新密码"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600 bg-white"
+                      className="w-full px-3.5 py-2.5 text-sm font-medium rounded-xl border border-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 bg-white text-stone-950 placeholder:text-stone-500 shadow-2xs"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-medium transition-colors"
+                    className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs"
                   >
                     确认更新密码
                   </button>
@@ -1029,7 +1083,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
 
               {/* Data Backup & Reset */}
               <div className="max-w-xl space-y-4 pt-6 border-t border-stone-200">
-                <h4 className="text-sm font-bold text-stone-900">
+                <h4 className="text-sm font-bold text-stone-950">
                   数据安全与初始化
                 </h4>
 
@@ -1055,7 +1109,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>导出全站数据备份 (JSON)</span>
@@ -1072,7 +1126,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                         alert('已恢复为默认演示数据！');
                       }
                     }}
-                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>恢复初始默认数据</span>
@@ -1098,13 +1152,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-serif-sc font-bold text-stone-900 mb-4">
+            <h3 className="text-xl font-serif-sc font-bold text-stone-950 mb-4">
               {isNewService ? '添加新聚会堂次' : `编辑【${editingService?.name}】`}
             </h3>
 
             <form onSubmit={handleSaveService} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   聚会名称 *
                 </label>
                 <input
@@ -1113,13 +1167,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="例如：主日早堂崇拜"
                   value={serviceForm.name}
                   onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     聚会日期 *
                   </label>
                   <input
@@ -1128,11 +1182,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     placeholder="例如：每周日 / 每周三"
                     value={serviceForm.day}
                     onChange={(e) => setServiceForm({ ...serviceForm, day: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     时间段 *
                   </label>
                   <input
@@ -1141,57 +1195,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     placeholder="例如：09:00 - 10:30"
                     value={serviceForm.time}
                     onChange={(e) => setServiceForm({ ...serviceForm, time: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     地点/会堂
                   </label>
                   <input
                     type="text"
                     value={serviceForm.location}
                     onChange={(e) => setServiceForm({ ...serviceForm, location: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     使用语言
                   </label>
                   <input
                     type="text"
                     value={serviceForm.language}
                     onChange={(e) => setServiceForm({ ...serviceForm, language: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   适宜群体
                 </label>
                 <input
                   type="text"
                   value={serviceForm.targetGroup}
                   onChange={(e) => setServiceForm({ ...serviceForm, targetGroup: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   详细说明
                 </label>
                 <textarea
                   rows={3}
                   value={serviceForm.description}
                   onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
@@ -1205,7 +1259,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   }
                   className="rounded text-amber-600"
                 />
-                <label htmlFor="chk-online" className="text-xs text-stone-700 cursor-pointer">
+                <label htmlFor="chk-online" className="text-xs font-bold text-stone-900 cursor-pointer">
                   支持线上同步网络直播
                 </label>
               </div>
@@ -1217,13 +1271,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     setEditingService(null);
                     setIsNewService(false);
                   }}
-                  className="px-4 py-2 text-stone-600 text-sm"
+                  className="px-4 py-2 text-stone-700 hover:text-stone-950 text-sm font-medium hover:bg-stone-100 rounded-xl transition-colors"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-medium"
+                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs"
                 >
                   保存聚会
                 </button>
@@ -1247,13 +1301,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-serif-sc font-bold text-stone-900 mb-4">
+            <h3 className="text-xl font-serif-sc font-bold text-stone-950 mb-4">
               {isNewSermon ? '发布新讲道篇目' : `编辑讲道【${editingSermon?.title}】`}
             </h3>
 
             <form onSubmit={handleSaveSermon} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   讲题 *
                 </label>
                 <input
@@ -1262,24 +1316,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="例如：在风浪中经历出人意外的平安"
                   value={sermonForm.title}
                   onChange={(e) => setSermonForm({ ...sermonForm, title: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     讲道系列
                   </label>
                   <input
                     type="text"
                     value={sermonForm.series}
                     onChange={(e) => setSermonForm({ ...sermonForm, series: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     讲员 *
                   </label>
                   <input
@@ -1287,14 +1341,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     required
                     value={sermonForm.speaker}
                     onChange={(e) => setSermonForm({ ...sermonForm, speaker: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     圣经经文 *
                   </label>
                   <input
@@ -1303,36 +1357,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     placeholder="例如：路加福音 8:22-25"
                     value={sermonForm.scripture}
                     onChange={(e) => setSermonForm({ ...sermonForm, scripture: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     讲道日期
                   </label>
                   <input
                     type="text"
                     value={sermonForm.date}
                     onChange={(e) => setSermonForm({ ...sermonForm, date: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   内容概要 / 经文默想
                 </label>
                 <textarea
                   rows={3}
                   value={sermonForm.summary}
-                  onChange={(e) => setSermonForm({ ...sermonForm, summary: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  onChange={(e) => setServiceForm ? setSermonForm({ ...sermonForm, summary: e.target.value }) : undefined}
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   讲道核心要点提纲 (分行录入)
                 </label>
                 {sermonForm.keyPoints.map((point, idx) => (
@@ -1346,7 +1400,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                       newPoints[idx] = e.target.value;
                       setSermonForm({ ...sermonForm, keyPoints: newPoints });
                     }}
-                    className="w-full px-3.5 py-1.5 text-xs rounded-lg border border-stone-300 bg-stone-50 mb-1.5"
+                    className="w-full px-3.5 py-2 text-xs font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 mb-1.5 shadow-2xs"
                   />
                 ))}
               </div>
@@ -1358,13 +1412,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     setEditingSermon(null);
                     setIsNewSermon(false);
                   }}
-                  className="px-4 py-2 text-stone-600 text-sm"
+                  className="px-4 py-2 text-stone-700 hover:text-stone-950 text-sm font-medium hover:bg-stone-100 rounded-xl transition-colors"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-medium"
+                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs"
                 >
                   发布讲道
                 </button>
@@ -1388,13 +1442,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-serif-sc font-bold text-stone-900 mb-4">
+            <h3 className="text-xl font-serif-sc font-bold text-stone-950 mb-4">
               {isNewVerse ? '录入新经文金句' : '编辑经文与默想'}
             </h3>
 
             <form onSubmit={handleSaveVerse} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   分类主题 *
                 </label>
                 <input
@@ -1403,12 +1457,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="例如：安息与安慰 / 救赎与恩典"
                   value={verseForm.category}
                   onChange={(e) => setVerseForm({ ...verseForm, category: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   圣经经文内容 *
                 </label>
                 <textarea
@@ -1417,12 +1471,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="请输入经文全文..."
                   value={verseForm.verse}
                   onChange={(e) => setVerseForm({ ...verseForm, verse: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50 font-serif-sc"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs font-serif-sc"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   经文章节出处 *
                 </label>
                 <input
@@ -1431,12 +1485,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="例如：马太福音 11:28-29"
                   value={verseForm.reference}
                   onChange={(e) => setVerseForm({ ...verseForm, reference: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50 font-serif-sc"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs font-serif-sc"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   教牧灵修默想笔记
                 </label>
                 <textarea
@@ -1444,7 +1498,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="为这节经文配上一段温暖的属灵默想..."
                   value={verseForm.reflection}
                   onChange={(e) => setVerseForm({ ...verseForm, reflection: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
@@ -1455,13 +1509,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     setEditingVerse(null);
                     setIsNewVerse(false);
                   }}
-                  className="px-4 py-2 text-stone-600 text-sm"
+                  className="px-4 py-2 text-stone-700 hover:text-stone-950 text-sm font-medium hover:bg-stone-100 rounded-xl transition-colors"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-medium"
+                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs"
                 >
                   保存经文
                 </button>
@@ -1485,13 +1539,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-serif-sc font-bold text-stone-900 mb-4">
+            <h3 className="text-xl font-serif-sc font-bold text-stone-950 mb-4">
               {isNewEvent ? '发布新特别活动' : '编辑活动日程'}
             </h3>
 
             <form onSubmit={handleSaveEvent} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   活动标题 *
                 </label>
                 <input
@@ -1500,13 +1554,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   placeholder="例如：秋季全教会联合受洗感恩崇拜"
                   value={eventForm.title}
                   onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     活动日期 *
                   </label>
                   <input
@@ -1515,11 +1569,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     placeholder="例如：2026年9月27日"
                     value={eventForm.date}
                     onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     星期 / 时间 *
                   </label>
                   <input
@@ -1528,14 +1582,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     placeholder="例如：主日 14:00 - 16:30"
                     value={eventForm.time}
                     onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     分类
                   </label>
                   <select
@@ -1546,7 +1600,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                         category: e.target.value as ChurchEvent['category']
                       })
                     }
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-semibold rounded-xl border border-stone-400 bg-white text-stone-950 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   >
                     <option value="特会">特会</option>
                     <option value="团契">团契</option>
@@ -1556,27 +1610,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-900 mb-1">
                     地点
                   </label>
                   <input
                     type="text"
                     value={eventForm.location}
                     onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                    className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   活动描述
                 </label>
                 <textarea
                   rows={3}
                   value={eventForm.description}
                   onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50"
+                  className="w-full px-3.5 py-2 text-sm font-medium rounded-xl border border-stone-400 bg-white text-stone-950 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
@@ -1590,7 +1644,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                   }
                   className="rounded text-amber-600"
                 />
-                <label htmlFor="chk-reg" className="text-xs text-stone-700 cursor-pointer">
+                <label htmlFor="chk-reg" className="text-xs font-bold text-stone-900 cursor-pointer">
                   需要信徒提前在线登记报名
                 </label>
               </div>
@@ -1602,13 +1656,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToSite }) 
                     setEditingEvent(null);
                     setIsNewEvent(false);
                   }}
-                  className="px-4 py-2 text-stone-600 text-sm"
+                  className="px-4 py-2 text-stone-700 hover:text-stone-950 text-sm font-medium hover:bg-stone-100 rounded-xl transition-colors"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-medium"
+                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs"
                 >
                   保存活动
                 </button>

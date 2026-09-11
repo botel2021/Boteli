@@ -21,7 +21,7 @@ import { Sermon } from '../types';
 import { useChurch } from '../context/ChurchContext';
 
 export const SermonPlayer: React.FC = () => {
-  const { sermons } = useChurch();
+  const { sermons, churchInfo } = useChurch();
   const [activeSermon, setActiveSermon] = useState<Sermon>(() => sermons[0] || {
     id: 'default',
     title: '作主门徒',
@@ -180,7 +180,7 @@ export const SermonPlayer: React.FC = () => {
 
   const handleCopyShare = () => {
     navigator.clipboard.writeText(
-      `推荐主日讲道【${activeSermon.title}】\n讲员：${activeSermon.speaker} | 经文：${activeSermon.scripture}\n来自：恩典之光基督教会`
+      `推荐主日讲道【${activeSermon.title}】\n讲员：${activeSermon.speaker} | 经文：${activeSermon.scripture}\n来自：${churchInfo.name}`
     );
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -456,7 +456,7 @@ export const SermonPlayer: React.FC = () => {
 
             {/* Bottom note */}
             <div className="mt-6 p-4 rounded-xl bg-stone-800/40 border border-stone-800 text-xs text-stone-400 text-center">
-              所有讲道录音与敬拜诗歌版权归属恩典之光基督教会，供个人灵修及福音传递使用。
+              所有讲道录音与敬拜诗歌版权归属{churchInfo.name}，供个人灵修及福音传递使用。
             </div>
           </div>
         </div>

@@ -158,7 +158,7 @@ export const WorshipScheduleSection: React.FC<WorshipScheduleSectionProps> = ({ 
                 {service.isOnlineAvailable && (
                   <button
                     onClick={() => {
-                      alert(`已开启【${service.name}】直播通道！\n直播间：恩典之光官方直播台\n会议号：889-234-7721\n密码：grace`);
+                      alert(`已开启【${service.name}】直播通道！\n直播间：${churchInfo.name}官方直播台\n会议号：889-234-7721\n密码：bethel`);
                     }}
                     className="text-xs font-medium text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
                   >
@@ -179,12 +179,12 @@ export const WorshipScheduleSection: React.FC<WorshipScheduleSectionProps> = ({ 
               <span>无法亲临现场？欢迎参加主日线上同步崇拜</span>
             </div>
             <p className="text-stone-700 text-xs sm:text-sm leading-relaxed mb-4">
-              针对出差在外、身患疾病或身处异地的弟兄姊妹与慕道朋友，我们每周日早堂 09:00 与午堂 11:00 会同步开放在线超清音视频直播。崇拜前请预备安静的心，关闭打扰通知。
+              针对出差在外、身患疾病或身处异地的弟兄姊妹与慕道朋友，我们主日会同步开放在线音视频直播。崇拜前请预备安静的心，关闭打扰通知。
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => {
-                  alert('正在接入主日崇拜官方直播服务器...\n欢迎收看恩典之光基督教会线上敬拜！');
+                  alert(`正在接入主日崇拜官方直播服务器...\n欢迎收看【${churchInfo.name}】线上敬拜！`);
                 }}
                 id="btn-enter-stream"
                 className="px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm transition-colors flex items-center gap-1.5"

@@ -150,8 +150,8 @@ export const DailyVerseWidget: React.FC = () => {
             {/* Generated Card Preview */}
             <div className="bg-gradient-to-b from-stone-900 via-amber-950/20 to-stone-900 border border-amber-400/30 p-6 rounded-2xl mb-6 text-left shadow-inner">
               <div className="flex items-center justify-between text-xs text-amber-400 mb-4 pb-2 border-b border-stone-800">
-                <span className="font-cinzel tracking-wider">LIGHT OF GRACE</span>
-                <span>✝ 恩典之光基督教会</span>
+                <span className="font-cinzel tracking-wider">{churchInfo.nameEn || 'BETHEL CHURCH'}</span>
+                <span>✝ {churchInfo.name}</span>
               </div>
               <p className="font-serif-sc text-stone-100 text-lg leading-relaxed mb-4 italic">
                 “{currentVerse.verse}”

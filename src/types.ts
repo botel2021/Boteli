@@ -109,3 +109,21 @@ export interface FAQItem {
   answer: string;
   category: string;
 }
+
+export interface CountdownConfig {
+  enabled: boolean;
+  mode: 'weekly' | 'custom';
+  // 每周常规模式
+  weeklyDay: number; // 0 为主日/周日, 1-6 为周一至周六
+  weeklyTime: string; // 格式如 "10:00"
+  weeklyDurationHours: number; // 聚会时长(小时)，例如 3
+  // 自定义特会/指定日期模式
+  customTitle: string; // 特会名称或倒计时提示
+  customTargetDate: string; // 目标ISO时间字符串，例如 "2026-10-04T10:00"
+  customSubtitle: string; // 地点与说明
+  // 通用文案配置
+  badgeText: string; // 顶部角标徽章文案
+  title: string; // 倒计时主标题
+  subtitle: string; // 崇拜堂次与地点说明
+  inProgressText: string; // 崇拜进行中提示文案
+}

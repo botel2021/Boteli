@@ -7,10 +7,12 @@ import {
   Ministry,
   ChurchEvent,
   PrayerRequest,
-  VisitorRSVP
+  VisitorRSVP,
+  CountdownConfig
 } from '../types';
 import {
   CHURCH_INFO,
+  DEFAULT_COUNTDOWN_CONFIG,
   SERVICES_SCHEDULE,
   SERMONS_DATA,
   DAILY_VERSES,
@@ -21,6 +23,7 @@ import {
 
 interface ChurchContextType {
   churchInfo: ChurchInfo;
+  countdownConfig: CountdownConfig;
   services: ServiceSchedule[];
   sermons: Sermon[];
   verses: BibleVerse[];
@@ -37,6 +40,9 @@ interface ChurchContextType {
 
   // Church info
   updateChurchInfo: (info: ChurchInfo) => void;
+
+  // Countdown config
+  updateCountdownConfig: (config: CountdownConfig) => void;
 
   // Services
   addService: (service: Omit<ServiceSchedule, 'id'>) => void;
@@ -76,7 +82,8 @@ interface ChurchContextType {
 const ChurchContext = createContext<ChurchContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  INFO: 'church_info_v1',
+  INFO: 'church_info_v2',
+  COUNTDOWN: 'church_countdown_v2',
   SERVICES: 'church_services_v1',
   SERMONS: 'church_sermons_v1',
   VERSES: 'church_verses_v1',
@@ -92,9 +99,27 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [churchInfo, setChurchInfo] = useState<ChurchInfo>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.INFO);
-      return saved ? JSON.parse(saved) : CHURCH_INFO;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // If old church name exists in storage, migrate to the new name
+        if (parsed.name && parsed.name.includes('恩典之光')) {
+          return CHURCH_INFO;
+        }
+        return parsed;
+      }
+      return CHURCH_INFO;
     } catch {
       return CHURCH_INFO;
+    }
+  });
+
+  // 1.1 Countdown Config
+  const [countdownConfig, setCountdownConfig] = useState<CountdownConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.COUNTDOWN);
+      return saved ? JSON.parse(saved) : DEFAULT_COUNTDOWN_CONFIG;
+    } catch {
+      return DEFAULT_COUNTDOWN_CONFIG;
     }
   });
 
@@ -201,6 +226,14 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     try {
+      localStorage.setItem(STORAGE_KEYS.COUNTDOWN, JSON.stringify(countdownConfig));
+    } catch (e) {
+      console.warn('Storage write error', e);
+    }
+  }, [countdownConfig]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(services));
     } catch (e) {
       console.warn('Storage write error', e);
@@ -270,6 +303,10 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Mutators
   const updateChurchInfo = (newInfo: ChurchInfo) => {
     setChurchInfo(newInfo);
+  };
+
+  const updateCountdownConfig = (newConfig: CountdownConfig) => {
+    setCountdownConfig(newConfig);
   };
 
   const addService = (serviceData: Omit<ServiceSchedule, 'id'>) => {
@@ -393,6 +430,7 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const resetToDefaults = () => {
     setChurchInfo(CHURCH_INFO);
+    setCountdownConfig(DEFAULT_COUNTDOWN_CONFIG);
     setServices(SERVICES_SCHEDULE);
     setSermons(SERMONS_DATA);
     setVerses(DAILY_VERSES);
@@ -406,6 +444,7 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <ChurchContext.Provider
       value={{
         churchInfo,
+        countdownConfig,
         services,
         sermons,
         verses,
@@ -418,6 +457,7 @@ export const ChurchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         logoutAdmin,
         changeAdminPassword,
         updateChurchInfo,
+        updateCountdownConfig,
         addService,
         updateService,
         deleteService,

@@ -32,15 +32,15 @@ export const AboutAndPastors: React.FC = () => {
           <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-xl border border-stone-200 group">
             <img
               src={exteriorImg}
-              alt="恩典之光基督教会园区外景"
+              alt={`${churchInfo.name}主堂外景`}
               referrerPolicy="no-referrer"
               className="w-full h-[360px] sm:h-[420px] object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent flex items-end p-6">
               <div className="text-white">
-                <div className="font-serif-sc font-bold text-lg">恩光中心主堂外观</div>
+                <div className="font-serif-sc font-bold text-lg">{churchInfo.name}主堂</div>
                 <div className="text-xs text-stone-300 mt-0.5">
-                  位于高新区天府大道中段 · 清新宁静的崇拜与团契园区
+                  {churchInfo.address} · 温馨圣洁的崇拜与团契家园
                 </div>
               </div>
             </div>

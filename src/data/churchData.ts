@@ -6,21 +6,37 @@ import {
   ChurchEvent,
   PrayerRequest,
   Pastor,
-  FAQItem
+  FAQItem,
+  CountdownConfig
 } from '../types';
 
 export const CHURCH_INFO = {
-  name: '恩典之光基督教会',
-  nameEn: 'Light of Grace Christian Church',
-  motto: '扎根真道 · 彼此相爱 · 见证基督 · 祝福社区',
+  name: '意大利普拉托伯特利教会',
+  nameEn: 'Chiesa Cristiana Evangelica Bethel Prato',
+  motto: '扎根真道 · 彼此相爱 · 见证基督 · 祝福侨胞',
   bibleTheme: '凡劳苦担重担的人可以到我这里来，我就使你们得安息。（马太福音 11:28）',
-  address: '成都市高新区天府大道中段128号 恩光中心A座2-3楼',
-  phone: '028-8599-7721 / 189-8099-1234',
-  email: 'contact@grace-church.example',
-  pastoralHours: '周二至周六 09:30 - 17:30',
-  foundedYear: '2008年',
-  sundayMainServiceTime: '每周日 09:30 / 11:15',
-  liveStreamUrl: 'https://live.grace-church.example',
+  address: '意大利普拉托市 (Prato, Toscana, Italia)',
+  phone: '+39 0574-000000 / +39 328-000000',
+  email: 'bethelprato@gmail.com',
+  pastoralHours: '周二至周六 10:00 - 18:00',
+  foundedYear: '2012年',
+  sundayMainServiceTime: '每周日 10:00 / 14:30',
+  liveStreamUrl: 'https://live.bethel-prato.org',
+};
+
+export const DEFAULT_COUNTDOWN_CONFIG: CountdownConfig = {
+  enabled: true,
+  mode: 'weekly',
+  weeklyDay: 0, // 0 = 星期日/主日
+  weeklyTime: '10:00',
+  weeklyDurationHours: 3,
+  customTitle: '距离特别特会培灵盛会还有',
+  customTargetDate: '2026-10-04T10:00',
+  customSubtitle: '意大利普拉托伯特利主堂现场举行',
+  badgeText: 'Upcoming Sunday Worship',
+  title: '距离本周主日崇拜还有',
+  subtitle: '早堂 10:00 · 午堂 14:30 · 普拉托伯特利主堂',
+  inProgressText: '今日主日崇拜现正进行中 · 欢迎入堂或在线同步参与'
 };
 
 export const SERVICES_SCHEDULE: ServiceSchedule[] = [
@@ -415,7 +431,7 @@ export const FAQS_DATA: FAQItem[] = [
   {
     category: '初次来访',
     question: '我不是基督徒，也没有宗教背景，可以来参加聚会吗？',
-    answer: '非常欢迎！无论您的信仰背景、生活经历或对信仰抱有什么疑问，恩典之光基督教会的大门向所有人敞开。您可以像普通朋友一样安静聆听诗歌与讲道，不用担心会有任何压力。'
+    answer: '非常欢迎！无论您的信仰背景、生活经历或对信仰抱有什么疑问，意大利普拉托伯特利教会的大门向所有人敞开。您可以像普通朋友一样安静聆听诗歌与讲道，不用担心会有任何压力。'
   },
   {
     category: '初次来访',
